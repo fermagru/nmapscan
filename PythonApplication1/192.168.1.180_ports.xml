@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///C:/Program Files (x86)/Nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.91 scan initiated Fri Jul 30 16:49:34 2021 as: nmap -sC -sV -p0,22,111,139,445,623,3128,8006,16992,16994 -oX 192.168.1.180_ports 192.168.1.180 -->
+<nmaprun scanner="nmap" args="nmap -sC -sV -p0,22,111,139,445,623,3128,8006,16992,16994 -oX 192.168.1.180_ports 192.168.1.180" start="1627656574" startstr="Fri Jul 30 16:49:34 2021" version="7.91" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="10" services="0,22,111,139,445,623,3128,8006,16992,16994"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.1.180" addrtype="ipv4"/>
+<address addr="88:51:FB:52:A8:E1" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<host starttime="1627656577" endtime="1627656618"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.1.180" addrtype="ipv4"/>
+<address addr="88:51:FB:52:A8:E1" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+<hostname name="proxmox.fm.lc" type="PTR"/>
+</hostnames>
+<ports><port protocol="tcp" portid="0"><state state="closed" reason="reset" reason_ttl="64"/></port>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ssh" product="OpenSSH" version="7.9p1 Debian 10+deb10u2" extrainfo="protocol 2.0" ostype="Linux" method="probed" conf="10"><cpe>cpe:/a:openbsd:openssh:7.9p1</cpe><cpe>cpe:/o:linux:linux_kernel</cpe></service><script id="ssh-hostkey" output="&#xa;  2048 30:b5:b2:2a:cd:0f:8b:2a:eb:9d:90:e2:d3:f7:05:28 (RSA)&#xa;  256 4d:f7:30:69:27:f4:82:5b:b2:a9:02:b4:52:19:26:35 (ECDSA)&#xa;  256 b8:7b:e0:96:b0:9a:d1:0b:25:b2:fe:81:40:65:5b:b6 (ED25519)"><table>
+<elem key="bits">2048</elem>
+<elem key="type">ssh-rsa</elem>
+<elem key="fingerprint">30b5b22acd0f8b2aeb9d90e2d3f70528</elem>
+<elem key="key">AAAAB3NzaC1yc2EAAAADAQABAAABAQDn9SJ1EUPkszyawvmGwGfVpRJqfL7ShB+8MXhhkC90smdb/WDLAekbQz/xJUZUIRFQdpLteQ2kh/WxhR0l+FGGHxf7wUWz0O1tHod2TZ+ZX8VYrmPhO2LwswtQNE5jPYrrbKw+YtugwvUIWfxP4RrxGFvJzUDOTMBgtPsb0eQ08OC2430DZT/nmYw77oDDEj3PuBjwTw2E+1mbiMBZ/bQ2jqxlhLIUVx2c3VpzwnAJE3eRm1mZG4ky6ckPLXX/yYxCxAQm+09yQzw3bOT6RsJDVbaSdTti4CWFgu0YTZUg+HN0SOdblstkZyhEoZQO6n+JTNWFUFzP3WAEV1a704aX</elem>
+</table>
+<table>
+<elem key="bits">256</elem>
+<elem key="type">ecdsa-sha2-nistp256</elem>
+<elem key="fingerprint">4df7306927f4825bb2a902b452192635</elem>
+<elem key="key">AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBHQw/YYcmvndyxhy8/SJAlV2mNU73yW48//sqrVPxgZg/BGBTarbqiApml4j+SHseEaX6TbcFDyCJDiHH4JGxf0=</elem>
+</table>
+<table>
+<elem key="bits">256</elem>
+<elem key="type">ssh-ed25519</elem>
+<elem key="fingerprint">b87be096b09ad10b25b2fe8140655bb6</elem>
+<elem key="key">AAAAC3NzaC1lZDI1NTE5AAAAIGPCNLxv/5mJhMg8X6hRskdA5tKcBrURbYIs9rmSq63+</elem>
+</table>
+</script></port>
+<port protocol="tcp" portid="111"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="rpcbind" version="2-4" extrainfo="RPC #100000" method="probed" conf="10"/><script id="rpcinfo" output="&#xa;  program version    port/proto  service&#xa;  100000  2,3,4        111/tcp   rpcbind&#xa;  100000  2,3,4        111/udp   rpcbind&#xa;  100000  3,4          111/tcp6  rpcbind&#xa;  100000  3,4          111/udp6  rpcbind&#xa;"><table key="100000">
+<table key="local">
+<elem key="owner">superuser</elem>
+<elem key="addr">/run/rpcbind.sock</elem>
+<table key="version">
+<elem>3</elem>
+<elem>4</elem>
+</table>
+</table>
+<table key="tcp6">
+<elem key="owner">superuser</elem>
+<elem key="port">111</elem>
+<table key="version">
+<elem>3</elem>
+<elem>4</elem>
+</table>
+<elem key="addr">::</elem>
+</table>
+<table key="tcp">
+<elem key="owner">superuser</elem>
+<elem key="port">111</elem>
+<table key="version">
+<elem>2</elem>
+<elem>3</elem>
+<elem>4</elem>
+</table>
+<elem key="addr">0.0.0.0</elem>
+</table>
+<table key="udp6">
+<elem key="owner">superuser</elem>
+<elem key="port">111</elem>
+<table key="version">
+<elem>3</elem>
+<elem>4</elem>
+</table>
+<elem key="addr">::</elem>
+</table>
+<table key="udp">
+<elem key="owner">superuser</elem>
+<elem key="port">111</elem>
+<table key="version">
+<elem>2</elem>
+<elem>3</elem>
+<elem>4</elem>
+</table>
+<elem key="addr">0.0.0.0</elem>
+</table>
+</table>
+</script></port>
+<port protocol="tcp" portid="139"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="netbios-ssn" product="Samba smbd" version="3.X - 4.X" extrainfo="workgroup: WORKGROUP" hostname="PVE" method="probed" conf="10"><cpe>cpe:/a:samba:samba</cpe></service></port>
+<port protocol="tcp" portid="445"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="netbios-ssn" product="Samba smbd" version="4.9.5-Debian" extrainfo="workgroup: WORKGROUP" hostname="PVE" method="probed" conf="10"><cpe>cpe:/a:samba:samba</cpe></service></port>
+<port protocol="tcp" portid="623"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Intel Active Management Technology User Notification Service httpd" version="8.0.4" method="probed" conf="10"><cpe>cpe:/h:intel:active_management_technology:8.0.4</cpe></service><script id="http-server-header" output="Intel(R) Active Management Technology 8.0.4"><elem>Intel(R) Active Management Technology 8.0.4</elem>
+</script><script id="http-title" output="Intel&amp;reg; Active Management Technology&#xa;Requested resource was /logon.htm"><elem key="title">Intel&amp;reg; Active Management Technology</elem>
+<elem key="redirect_url">/logon.htm</elem>
+</script></port>
+<port protocol="tcp" portid="3128"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Proxmox Virtual Environment REST API" version="3.0" method="probed" conf="10"><cpe>cpe:/a:proxmox:proxmox_virtual_environment:3.0</cpe></service><script id="http-server-header" output="pve-api-daemon/3.0"><elem>pve-api-daemon/3.0</elem>
+</script><script id="http-title" output="Site doesn&apos;t have a title."></script></port>
+<port protocol="tcp" portid="8006"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="wpl-analytics" method="table" conf="3"/></port>
+<port protocol="tcp" portid="16992"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Intel Active Management Technology User Notification Service httpd" version="8.0.4" method="probed" conf="10"><cpe>cpe:/h:intel:active_management_technology:8.0.4</cpe></service><script id="http-server-header" output="Intel(R) Active Management Technology 8.0.4"><elem>Intel(R) Active Management Technology 8.0.4</elem>
+</script><script id="http-title" output="Intel&amp;reg; Active Management Technology&#xa;Requested resource was /logon.htm"><elem key="title">Intel&amp;reg; Active Management Technology</elem>
+<elem key="redirect_url">/logon.htm</elem>
+</script></port>
+<port protocol="tcp" portid="16994"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="tcpwrapped" method="probed" conf="8"/></port>
+</ports>
+<hostscript><script id="clock-skew" output="mean: -40m00s, deviation: 1h09m16s, median: -1s"><elem key="median">-1</elem>
+<elem key="count">3</elem>
+<elem key="stddev">4156</elem>
+<elem key="mean">-2400</elem>
+</script><script id="nbstat" output="NetBIOS name: PVE, NetBIOS user: &lt;unknown&gt;, NetBIOS MAC: &lt;unknown&gt; (unknown)"/><script id="smb-os-discovery" output="&#xa;  OS: Windows 6.1 (Samba 4.9.5-Debian)&#xa;  Computer name: pve&#xa;  NetBIOS computer name: PVE\x00&#xa;  Domain name: dev&#xa;  FQDN: pve.dev&#xa;  System time: 2021-07-30T16:49:53+02:00&#xa;"><elem key="os">Windows 6.1</elem>
+<elem key="lanmanager">Samba 4.9.5-Debian</elem>
+<elem key="server">PVE\x00</elem>
+<elem key="date">2021-07-30T16:49:53+02:00</elem>
+<elem key="fqdn">pve.dev</elem>
+<elem key="domain_dns">dev</elem>
+<elem key="workgroup">WORKGROUP\x00</elem>
+</script><script id="smb-security-mode" output="&#xa;  account_used: guest&#xa;  authentication_level: user&#xa;  challenge_response: supported&#xa;  message_signing: disabled (dangerous, but default)"><elem key="account_used">guest</elem>
+<elem key="authentication_level">user</elem>
+<elem key="challenge_response">supported</elem>
+<elem key="message_signing">disabled</elem>
+</script><script id="smb2-security-mode" output="&#xa;  2.02: &#xa;    Message signing enabled but not required"><table key="2.02">
+<elem>Message signing enabled but not required</elem>
+</table>
+</script><script id="smb2-time" output="&#xa;  date: 2021-07-30T14:49:53&#xa;  start_date: N/A"><elem key="date">2021-07-30T14:49:53</elem>
+<elem key="start_date">N/A</elem>
+</script></hostscript><times srtt="11048" rttvar="6505" to="100000"/>
+</host>
+<runstats><finished time="1627656618" timestr="Fri Jul 30 16:50:18 2021" summary="Nmap done at Fri Jul 30 16:50:18 2021; 1 IP address (1 host up) scanned in 44.13 seconds" elapsed="44.13" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>
