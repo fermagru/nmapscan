@@ -1,10 +1,69 @@
 from xml.dom import minidom
-import shlex, subprocess, csv
+import shlex, subprocess, csv, json, sys, time
 
+#---------------------------------------------------INICIO CARGA EL DICCIONARIO DE PUERTOS POR DEFECTO---------------------------------------
+class servicioDefault():
+	puerto = ""
+	tipo = ""
+	servicio = ""
+class servicioDefaultDB():
+	servicios = []
+
+diccionarioServiciosDefecto = servicioDefaultDB()
+
+def cargarServiciosDefault():
+	path = "puertosPorDefecto.csv" #Path del fichero con el listado de servicios
+	with open(path) as dbserviciosdefault:
+		reader = csv.reader(dbserviciosdefault, delimiter=";")
+		for row in reader: #Por cada fila se añade un servicio
+			sd = servicioDefault()
+			sd.puerto = row[0]
+			sd.tipo = row[1]
+			sd.servicio = row[2]
+			diccionarioServiciosDefecto.servicios.append(sd) #Por cada fila se añade un servicio
+
+#Llamamos a la función para cargar el diccionario
+cargarServiciosDefault()
+#---------------------------------------------------FINALIZA CARGA EL DICCIONARIO DE PUERTOS POR DEFECTO --------------------------------------
+
+#-------------------------------------BUCLE PARA RECORGER EL REPORT Y BUSCAR COINCIDENCIAS EN EL DICCIONARIO Y searchsploit -------------------
+
+def buscarYEncontrarExploits(puerto):
+	p = port()
+	for df in diccionarioServiciosDefecto.servicios:
+		if df.puerto == p.id:
+			p.name = df.servicio
+			#Ahora hace la consulta a searchExploit
+			command_line1 = 'searchsploit '
+			command_line2 = p.name
+			command = command_line1 + command_line2
+	
+			args = shlex.split(command)
+			#Ejecuta el comando de búsqueda y guarda el resultado para el informe.
+			p.resultadoSearhExploit = subprocess.getoutput(args)
+		
+	
+#-----------------------------------------FIN DEL BUCLE PARA RECORGER EL REPORT Y BUSCAR EN EL DICCIONARIO Y searchsploit ---------------------
+
+#-----------------------------------------A TRAVÉS DEL TTL COMPROBAMOS QUE SISTEMA OPERATIVO HAY DETRÁS----------------------------------------
+def ttl_scan(ip):
+
+	command_line1 = 'ping '
+	command = command_line1 + ip
+	
+	args = shlex.split(command)
+	result = subprocess.getoutput(args)
+	
+	numbers = [int(temp)for temp in result.split("=") if temp.isdigit()]
+
+	print(numbers)
+
+#------------------------------------------------------------FIN COMPROBACIÓN DEL SO TTL -----------------------------------------------------
 
 class ReportHost():
 	ip = ""
 	mac = ""
+	SO = ""
 	ports = []
 
 class port():
@@ -16,8 +75,8 @@ class port():
 	reason_ttl = ""
 	url = ""
 	extraInfo = ""
-
-
+	resultadoSearhExploit = ""
+	
 
 doc = minidom.parse('C:\\Users\\FMAG\\allPorts.xml') #Lee el primer escaneo
 
@@ -48,13 +107,16 @@ def insertLine(ipAddress):
 		for IP in IPS:
 			if IP.getAttribute("addrtype") == "ipv4":
 				line.ip = IP.getAttribute("addr")
+				line.SO = ttl_scan(line.ip)
 				line.puertos = h.getElementsByTagName("port")
 				for p in line.puertos:
 					p1 = port()
-					port.id = p.getAttribute("portid")
-					port.name= p.getAttribute("name")
-					port.protocol = p.getAttribute("protocol")
-					port.state =p.getAttribute("state")
+					p1.id = p.getAttribute("portid")
+					p1.name= p.getAttribute("name")
+					p1.protocol = p.getAttribute("protocol")
+					p1.state =p.getAttribute("state")
+					p1.reason_ttl = p.getAttribute("reason_ttl")
+					p1.resultadoSearhExploit = buscarYEncontrarExploits(p1.id)
 					line.ports.append(p1)
 
 			elif IP.getAttribute("addrtype") == "mac":
@@ -101,15 +163,44 @@ for dispositivo in dispositivos:
 
 #4
 #Una vez obtenida toda la información generamos un CSV formateado para informe.
-def generarReport():
+def generarReportCSV():
 	with open('reportEscaneoNMAP.csv', 'w', newline='') as csv_file:
 		for host in report:
 			writer = csv.writer(csv_file)
-			writer.writerow(["IP", "MAC"])
-			writer.writerow([host.ip, host.mac])
+			writer.writerow(["IP", "MAC", "SO"])
+			writer.writerow([host.ip, host.mac, host.SO])
 			writer.writerow(["Ports"])
 			writer.writerow(["ID", "Name", "Protocol", "State"])
 			for port in host.ports:
 				writer.writerow([port.id, port.name, port.protocol])
+				writer.writerow(["Busqueda searchsploit: ", port.resultadoSearhExploit])
 
-generarReport()
+generarReportCSV()
+
+#4
+#Una vez obtenida toda la información generamos un JSON formateado para informe.
+##Se puede llamar de forma adicional a esta función para guardar un fichero JSON.
+def generarReportJSON():
+
+	data = {}
+	data['host'] = []
+	data['puerto'] = []
+
+	with open('reportEscaneoNMAP.csv', 'w', newline='') as csv_file:
+		for host in report:
+			data['host'].append({
+			'IP': host.ip,
+			'MAC': host.mac,
+			'SO': host.SO
+			})
+
+			for port in host.ports:
+				data['puerto'].append({
+				'id': port.id,
+				'nombre': port.name,
+				'protocolo': port.protocol,
+				'Busqueda searchsploit: ': port.resultadoSearhExploit,
+				})
+
+		with open('data.txt', 'w') as outfile:
+			json.dump(data, outfile)
