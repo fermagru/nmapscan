@@ -1,6 +1,18 @@
 from xml.dom import minidom
 import shlex, subprocess, csv, json, sys, time
 
+#-------------------------EMPIEZA PRIMERA EJECUCIÓN DE NMAP. Para que escanae la red en busca de dispositivos y puertos abiertos-------------
+command_line1 = 'nmap -sS --min-rate 5000 -p- --open -vvv -n -Pn '
+command_line2 = '10.0.2.0/24' #EDITAR LA DIRECCIÓN IP Y MÁSCARA PARA ESCANEAR LA RED.
+command_line3 = ' -oX allPorts.xml'
+command = command_line1 + command_line2 + command_line3
+	
+args = shlex.split(command)
+#Ejecuta el comando de búsqueda y guarda el resultado para el informe.
+subprocess.call(args)
+
+#----------------------------- FINALIZA EJECUCIÓN DE NMAP. Para que escanae la red en busca de dispositivos y puertos abiertos----------------
+
 #---------------------------------------------------INICIO CARGA EL DICCIONARIO DE PUERTOS POR DEFECTO---------------------------------------
 class servicioDefault():
 	puerto = ""
@@ -29,18 +41,20 @@ cargarServiciosDefault()
 #-------------------------------------BUCLE PARA RECORGER EL REPORT Y BUSCAR COINCIDENCIAS EN EL DICCIONARIO Y searchsploit -------------------
 
 def buscarYEncontrarExploits(puerto):
-	p = port()
+	
 	for df in diccionarioServiciosDefecto.servicios:
-		if df.puerto == p.id:
-			p.name = df.servicio
+		if df.puerto == puerto.id and df.puerto != "":
+			puerto.name = df.servicio
 			#Ahora hace la consulta a searchExploit
 			command_line1 = 'searchsploit '
-			command_line2 = p.name
+			command_line2 = puerto.name
 			command = command_line1 + command_line2
 	
 			args = shlex.split(command)
 			#Ejecuta el comando de búsqueda y guarda el resultado para el informe.
-			p.resultadoSearhExploit = subprocess.getoutput(args)
+			return subprocess.getoutput(args)
+
+
 		
 	
 #-----------------------------------------FIN DEL BUCLE PARA RECORGER EL REPORT Y BUSCAR EN EL DICCIONARIO Y searchsploit ---------------------
@@ -48,15 +62,27 @@ def buscarYEncontrarExploits(puerto):
 #-----------------------------------------A TRAVÉS DEL TTL COMPROBAMOS QUE SISTEMA OPERATIVO HAY DETRÁS----------------------------------------
 def ttl_scan(ip):
 
-	command_line1 = 'ping '
+	#64 bytes from 10.0.2.5: icmp_seq=1 ttl=64 time=0.312 ms
+	command_line1 = 'ping -c 1 ' # Enviamos un único paquete para comprobar el ttl
 	command = command_line1 + ip
 	
 	args = shlex.split(command)
-	result = subprocess.getoutput(args)
+	result = subprocess.getoutput(args) # Ejemplo de cadena: "64 bytes from 10.0.2.5: icmp_seq=1 ttl=64 time=0.312 ms"
+	char = '=' #Separador por '='
+	resultado_ping = result.split() # Separamos el resultado por espacios.
+	numero = resultado_ping[5].split(char) # Utilizamos el separador '=' para quedarnos solo con el número, valor del ttl
 	
-	numbers = [int(temp)for temp in result.split("=") if temp.isdigit()]
+	if  len(numero) < 2 or numero[1] is None:
+		return "No se ha podido detectar el SO"
+		pass
+	elif int(numero[1]) <= 64: # Comprobamos si el valor del TTL es menor de 64
+		return "UNIX/Linux"
 
-	print(numbers)
+	else:
+		return "Windows" # Si es mayor de 64 es un Windows.
+
+	#El valor del TTL se puede ver alterado cuando hay algún elemento de red en medio, pero la alteración es en valor uno o dos.
+	
 
 #------------------------------------------------------------FIN COMPROBACIÓN DEL SO TTL -----------------------------------------------------
 
@@ -78,7 +104,7 @@ class port():
 	resultadoSearhExploit = ""
 	
 
-doc = minidom.parse('C:\\Users\\FMAG\\allPorts.xml') #Lee el primer escaneo
+doc = minidom.parse('allPorts.xml') #Lee el primer escaneo
 
 #Lineas de report
 report = []
@@ -112,11 +138,12 @@ def insertLine(ipAddress):
 				for p in line.puertos:
 					p1 = port()
 					p1.id = p.getAttribute("portid")
-					p1.name= p.getAttribute("name")
+					p1.name= p.getAttribute("name") #Esto esta dentro de otra etiqueta
 					p1.protocol = p.getAttribute("protocol")
 					p1.state =p.getAttribute("state")
 					p1.reason_ttl = p.getAttribute("reason_ttl")
-					p1.resultadoSearhExploit = buscarYEncontrarExploits(p1.id)
+					p1.resultadoSearhExploit = buscarYEncontrarExploits(p1)
+					if p1.name == "": p1.name = "No se ha detectado una aplicación por defecto para este puerto"
 					line.ports.append(p1)
 
 			elif IP.getAttribute("addrtype") == "mac":
@@ -172,7 +199,7 @@ def generarReportCSV():
 			writer.writerow(["Ports"])
 			writer.writerow(["ID", "Name", "Protocol", "State"])
 			for port in host.ports:
-				writer.writerow([port.id, port.name, port.protocol])
+				writer.writerow([port.id, port.name, port.protocol, port.state])
 				writer.writerow(["Busqueda searchsploit: ", port.resultadoSearhExploit])
 
 generarReportCSV()
