@@ -1,0 +1,19 @@
+command_line1 = 'ping -c 1 ' # Enviamos un único paquete para comprobar el ttl
+	command = command_line1 + ip
+	
+	#args = shlex.split(command)
+	result = subprocess.getoutput(command) # Ejemplo de cadena: "64 bytes from 10.0.2.5: icmp_seq=1 ttl=64 time=0.312 ms"
+	char = '=' #Separador por '='
+	resultado_ping = result.split() # Separamos el resultado por espacios.
+	numero = resultado_ping[5].split(char) # Utilizamos el separador '=' para quedarnos solo con el número, valor del ttl
+	
+	ttn_int = 0
+	try:
+	    ttl_int = int(numero[1])
+	except error:
+	    return "No se ha podido detectar el SO" 
+	
+	if ttl_int <= 64 and ttl_int != 0: # Comprobamos si el valor del TTL es menor de 64
+		return "UNIX/Linux"
+	else:
+		return "Windows" # Si es mayor de 64 es un Windows.
