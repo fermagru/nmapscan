@@ -3,7 +3,7 @@ import shlex, subprocess, csv, json, sys, time
 
 #-------------------------EMPIEZA PRIMERA EJECUCIÓN DE NMAP. Para que escanae la red en busca de dispositivos y puertos abiertos-------------
 command_line1 = 'nmap -sS --min-rate 5000 -p- --open -vvv -n -Pn '
-command_line2 = '10.0.2.0/24' #EDITAR LA DIRECCIÓN IP Y MÁSCARA PARA ESCANEAR LA RED.
+command_line2 = '192.168.1.180' #EDITAR LA DIRECCIÓN IP Y MÁSCARA PARA ESCANEAR LA RED.
 command_line3 = ' -oX allPorts.xml'
 command = command_line1 + command_line2 + command_line3
 	
@@ -40,21 +40,29 @@ cargarServiciosDefault()
 
 #-------------------------------------BUCLE PARA RECORGER EL REPORT Y BUSCAR COINCIDENCIAS EN EL DICCIONARIO Y searchsploit -------------------
 
+#Buscamos coincidencias para puertos que pueden estar establecidos por defecto para algunas aplicaciones específicas.
 def buscarYEncontrarExploits(puerto):
-	
 	for df in diccionarioServiciosDefecto.servicios:
 		if df.puerto == puerto.id and df.puerto != "":
 			puerto.name = df.servicio
 			#Ahora hace la consulta a searchExploit
-			command_line1 = 'searchsploit '
+			command_line1 = 'searchsploit -t '
 			command_line2 = puerto.name
 			command = command_line1 + command_line2
-	
-			args = shlex.split(command)
+
 			#Ejecuta el comando de búsqueda y guarda el resultado para el informe.
-			return subprocess.getoutput(args)
+			return subprocess.getoutput(command)
 
 
+#Buscamos coincidencias en searchploit para lo que ha detectado NMAP
+def buscarCoincidenciasSearchploit(ficheroXML):
+			#Ahora hace la consulta a searchExploit
+			command_line1 = 'searchsploit -t --nmap'
+			command_line2 = ficheroXML
+			command = command_line1 + command_line2
+
+			#Ejecuta el comando de búsqueda y guarda el resultado para el informe.
+			return subprocess.getoutput(command)
 		
 	
 #-----------------------------------------FIN DEL BUCLE PARA RECORGER EL REPORT Y BUSCAR EN EL DICCIONARIO Y searchsploit ---------------------
@@ -66,23 +74,25 @@ def ttl_scan(ip):
 	command_line1 = 'ping -c 1 ' # Enviamos un único paquete para comprobar el ttl
 	command = command_line1 + ip
 	
-	args = shlex.split(command)
-	result = subprocess.getoutput(args) # Ejemplo de cadena: "64 bytes from 10.0.2.5: icmp_seq=1 ttl=64 time=0.312 ms"
+	#args = shlex.split(command)
+	result = subprocess.getoutput(command) # Ejemplo de cadena: "64 bytes from 10.0.2.5: icmp_seq=1 ttl=64 time=0.312 ms"
 	char = '=' #Separador por '='
 	resultado_ping = result.split() # Separamos el resultado por espacios.
 	numero = resultado_ping[5].split(char) # Utilizamos el separador '=' para quedarnos solo con el número, valor del ttl
 	
-	if  len(numero) < 2 or numero[1] is None:
-		return "No se ha podido detectar el SO"
-		pass
-	elif int(numero[1]) <= 64: # Comprobamos si el valor del TTL es menor de 64
+	ttn_int = 0
+	try:
+	    ttl_int = int(numero[1])
+	except :
+	    return "No se ha podido detectar el SO" 
+	
+	if ttl_int <= 64 and ttl_int != 0: # Comprobamos si el valor del TTL es menor de 64
 		return "UNIX/Linux"
-
 	else:
 		return "Windows" # Si es mayor de 64 es un Windows.
 
 	#El valor del TTL se puede ver alterado cuando hay algún elemento de red en medio, pero la alteración es en valor uno o dos.
-	
+
 
 #------------------------------------------------------------FIN COMPROBACIÓN DEL SO TTL -----------------------------------------------------
 
@@ -101,6 +111,7 @@ class port():
 	reason_ttl = ""
 	url = ""
 	extraInfo = ""
+	servicioPorDefecto = ""
 	resultadoSearhExploit = ""
 	
 
@@ -140,10 +151,11 @@ def insertLine(ipAddress):
 					p1.id = p.getAttribute("portid")
 					p1.name= p.getAttribute("name") #Esto esta dentro de otra etiqueta
 					p1.protocol = p.getAttribute("protocol")
-					p1.state =p.getAttribute("state")
+					p1.state = p.getAttribute("state")
 					p1.reason_ttl = p.getAttribute("reason_ttl")
-					p1.resultadoSearhExploit = buscarYEncontrarExploits(p1)
-					if p1.name == "": p1.name = "No se ha detectado una aplicación por defecto para este puerto"
+					p1.resultadoSearhExploit = buscarCoincidenciasSearchploit(ipAddress + '_ports')
+					p1.servicioPorDefecto = buscarYEncontrarExploits(p1)
+					if p1.servicioPorDefecto == "": p1.servicioPorDefecto = "No se ha detectado una aplicación por defecto para este puerto"
 					line.ports.append(p1)
 
 			elif IP.getAttribute("addrtype") == "mac":
@@ -201,6 +213,7 @@ def generarReportCSV():
 			for port in host.ports:
 				writer.writerow([port.id, port.name, port.protocol, port.state])
 				writer.writerow(["Busqueda searchsploit: ", port.resultadoSearhExploit])
+				writer.writerow(["Aplicación por defecto: ", port.servicioPorDefecto])
 
 generarReportCSV()
 
@@ -213,7 +226,7 @@ def generarReportJSON():
 	data['host'] = []
 	data['puerto'] = []
 
-	with open('reportEscaneoNMAP.csv', 'w', newline='') as csv_file:
+	with open('reportEscaneoNMAP.json', 'w', newline='') as json_file:
 		for host in report:
 			data['host'].append({
 			'IP': host.ip,
@@ -227,7 +240,10 @@ def generarReportJSON():
 				'nombre': port.name,
 				'protocolo': port.protocol,
 				'Busqueda searchsploit: ': port.resultadoSearhExploit,
+				'Aplicación por defecto: ': port.servicioPorDefecto,
 				})
 
 		with open('data.txt', 'w') as outfile:
 			json.dump(data, outfile)
+
+generarReportJSON()
